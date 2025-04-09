@@ -15,7 +15,18 @@ const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
-
+app.get("/check-env", (req, res) => {
+  try {
+    const parsed = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
+    res.status(200).json({ success: true, parsed });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "FIREBASE_ADMIN_SDK env parse edilemedi",
+      error: err.message,
+    });
+  }
+});
 // Bildirim gönderme endpointi
 app.post("/sendNotification", async (req, res) => {
   const { token, title, body } = req.body;
