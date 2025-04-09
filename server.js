@@ -1,24 +1,22 @@
+// server.js
+require("dotenv").config();
+
 const express = require("express");
 const admin = require("firebase-admin");
-
+const bodyParser = require("body-parser");
+const cors = require("cors");
 const app = express();
-app.use(express.json());
 
-// Firebase Admin SDK başlatma
-let serviceAccount;
-try {
-  serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
-  if (!admin.apps.length) {
-    // Zaten başlatılmışsa tekrar başlatma
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-  }
-  console.log("✅ Firebase Admin SDK başarıyla başlatıldı");
-} catch (err) {
-  console.error("❌ Firebase Admin SDK başlatılamadı:", err.message);
-  throw new Error("Firebase Admin SDK başlatılamadı");
-}
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+console.log("🚀 process.env.FIREBASE_ADMIN_SDK?", process.env.PORT);
+// Firebase Admin SDK'yı başlat
+const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 // Bildirim gönderme endpointi
 app.post("/sendNotification", async (req, res) => {
@@ -29,10 +27,23 @@ app.post("/sendNotification", async (req, res) => {
   }
 
   const message = {
-    token,
-    notification: { title, body },
-    android: { notification: { sound: "default" } },
-    apns: { payload: { aps: { sound: "default" } } },
+    token: token,
+    notification: {
+      title: title,
+      body: body,
+    },
+    android: {
+      notification: {
+        sound: "default",
+      },
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: "default",
+        },
+      },
+    },
   };
 
   try {
@@ -41,7 +52,7 @@ app.post("/sendNotification", async (req, res) => {
     res.status(200).json({ success: true, response });
   } catch (error) {
     console.error("Bildirim gönderilemedi:", error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error });
   }
 });
 
@@ -49,5 +60,7 @@ app.get("/", (req, res) => {
   res.send("Hoş geldiniz! Bildirim sunucusu çalışıyor.");
 });
 
-// Vercel için export
-module.exports = app;
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`🚀 Bildirim sunucusu çalışıyor: http://localhost:${PORT}`);
+});
