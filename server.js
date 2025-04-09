@@ -21,6 +21,10 @@ admin.initializeApp({
 // Bildirim gönderme endpointi
 app.post("/sendNotification", async (req, res) => {
   const { token, title, body } = req.body;
+  console.log("📥 İstek alındı: ", req.body);
+  console.log("📨 Token:", req.body.token);
+  console.log("📝 Title:", req.body.title);
+  console.log("📄 Body:", req.body.body);
 
   if (!token || !title || !body) {
     return res.status(400).json({ error: "token, title ve body gerekli" });
