@@ -8,24 +8,32 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+console.log(
+  "🚀 process.env.FIREBASE_ADMIN_SDK?",
+  !!process.env.FIREBASE_ADMIN_SDK
+);
 
 // Firebase Admin SDK'yı başlat
-const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
+let serviceAccount;
+try {
+  serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
+} catch (err) {
+  console.error("❌ FIREBASE_ADMIN_SDK JSON parse hatası:", err.message);
+}
+
+if (!serviceAccount) {
+  throw new Error("❌ FIREBASE_ADMIN_SDK ortam değişkeni eksik ya da hatalı");
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
-app.get("/check-env", (req, res) => {
-  try {
-    const parsed = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
-    res.status(200).json({ success: true, parsed });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "FIREBASE_ADMIN_SDK env parse edilemedi",
-      error: err.message,
-    });
-  }
+
+app.get("/debug", (req, res) => {
+  res.status(200).json({
+    hasEnv: !!process.env.FIREBASE_ADMIN_SDK,
+    length: process.env.FIREBASE_ADMIN_SDK?.length,
+  });
 });
 // Bildirim gönderme endpointi
 app.post("/sendNotification", async (req, res) => {
