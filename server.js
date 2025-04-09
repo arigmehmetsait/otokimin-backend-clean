@@ -8,10 +8,9 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
- 
 
 // Firebase Admin SDK'yı başlat
-const serviceAccount = require(process.env.FIREBASE_ADMIN_SDK);
+const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
