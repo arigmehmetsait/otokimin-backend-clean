@@ -39,12 +39,18 @@ app.post("/sendNotification", async (req, res) => {
     android: {
       notification: {
         sound: "default",
+        channelId: "default", // 🔔 BU ÇOK ÖNEMLİ
+        priority: "max", // 📶 Önemli, yukarıdan görünmesini sağlar
       },
     },
     apns: {
       payload: {
         aps: {
           sound: "default",
+          alert: {
+            title: title,
+            body: body,
+          },
         },
       },
     },
